@@ -1,0 +1,166 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>bac</title>
+    <script
+    src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+    crossorigin="anonymous"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+        canvas {
+            border:1px solid #444;
+            background-color: #f1f1f1;
+            background-image:url(assets/SOL.jpg);
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+        /*img{display: none}*/
+
+        .scene {
+          width: 200px;
+          height: 260px;
+          border: 1px solid #CCC;
+          margin: 40px 0;
+          perspective: 600px;
+      }
+
+      .card {
+          width: 100%;
+          height: 100%;
+          transition: transform 1s;
+          transform-style: preserve-3d;
+          cursor: pointer;
+          position: relative;
+      }
+
+      .card.is-flipped {
+          transform: rotateY(180deg);
+      }
+
+      .card__face {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          line-height: 260px;
+          color: white;
+          text-align: center;
+          font-weight: bold;
+          font-size: 40px;
+          backface-visibility: hidden;
+      }
+
+      .card__face--back {
+          background: red;
+          /*transform: rotateY(180deg);*/
+      }
+
+      .card__face--front {
+          background: blue;
+          transform: rotateY(180deg);
+      }
+  </style>
+</head>
+<body>
+    <!-- <img src="assets/cardBack.png" alt="" id="cardBack" style="display: none"> -->
+    <div id="container">
+        <canvas width="800" height="576" id="canvas">
+            <div class="scene scene--card">
+              <div class="card">
+                <img class="card__face card__face--back" src="assets/cardBack.png" id="cardBack">
+                <div class="card__face card__face--front">front</div>
+            </div>
+        </div>
+    </canvas>
+</div>
+
+<script>
+    const cardWidth = 90;
+    const cardHeight = 140;
+    const interval = 20;
+    const cardLeft = 400 - 2*cardWidth - interval*1.7
+
+    const current = new Date();
+    current.setSeconds(current.getSeconds()-12)
+    let val = (current.getMinutes()%3)*60+ current.getSeconds();
+    
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext("2d");
+    var y = 220;
+    var img = document.getElementById('cardBack');
+    var d10 = 'assets/d10.png'
+
+    let deck = ['d10','sJ','cA','h5'] // p1,p2, b1,b2
+
+    
+    drawDeck(0)
+
+    function drawDeck(i){
+        if (i === deck.length) return
+    console.log(i)
+        img.onload = drawCard(`assets/${deck[i]}.png`, cardLeft + (interval+cardWidth)*i)
+        i ++;
+        setTimeout(function(){
+            drawDeck(i)
+        }, 1000)
+    }
+
+
+    function drawCard(src, x){
+        ctx.drawImage(img, x, y, cardWidth, cardHeight);
+
+        setTimeout(function(){
+            var img2 = new Image()
+            img2.onload = function(){
+                console.log(x)
+                // ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img2, x, y, cardWidth, cardHeight);
+            }
+            img2.src = src
+        },500)
+    }
+
+    // img.onload = animate
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); 
+        ctx.drawImage(img, x, y, cardWidth, cardHeight);
+        if (x > 280) {
+            x -= 10;
+            requestAnimationFrame(animate)
+        }
+    }
+
+
+    function startGame(n, side) { 
+
+    }
+
+
+    let myVar = setInterval(refreshGame, 1000);
+
+    function refreshGame() {
+        let d = new Date();
+        d.setSeconds(d.getSeconds()-12)
+        const id = 1
+        // const id = '{{next_id}}'==481 ? 1 : parseInt('{{next_id}}')
+        val += 1
+        let secs = 180 - val;
+        // document.querySelector("progress").value = val
+        if (d.getMinutes()%3===0 && d.getSeconds()===0) {
+        val = 0
+        $.get(`/select/${id}`, function(res){
+            const data = JSON.parse(res)
+            console.log(data, id)
+            startGame(data.bridges, data.start)
+            $('.progress-container').toggle()
+        })
+    }
+}
+startGame()
+
+</script>
+</body>
+</html>

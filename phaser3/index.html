@@ -1,0 +1,81 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>canvas</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+var config = {
+    type: Phaser.CANVAS,
+    width: 800,
+    height: 576,
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+var bg;
+var game = new Phaser.Game(config);
+let deck = ['d10','sJ','cA','h5']  // p1, b1, p2, b2
+let theta = [0,0,0,0]
+let drawnCards = []
+
+function preload ()
+{
+    this.load.setPath('assets/');
+    this.load.image('bg', 'SOL.jpg');
+    for (i of deck){
+        console.log(i)
+        this.load.image(i , `${i}.png`)
+    }
+}
+
+function create ()
+{
+    bg = this.add.image(400, document.querySelector('canvas').height/2, 'bg')
+    bg.displayHeight = document.querySelector('canvas').height
+    bg.displayWidth = document.querySelector('canvas').width
+
+    // console.log(this)
+    showCards(this)
+    // card = this.add.image(400, 300, 'card')
+    // card.displayHeight = 140
+}
+
+function showCards(obj){
+    var last = deck.pop();
+    var x = Phaser.Math.Between(0, 800);
+    var y = Phaser.Math.Between(0, 576);
+    drawnCards.push(obj.add.image(x, y, last))
+
+    if (deck.length > 0){
+        setTimeout(function(){
+            showCards(obj)
+        }, 1000)
+    }
+}
+
+function update(){
+    for(card of drawnCards){
+        card.displayHeight = 140
+        if(theta[drawnCards.indexOf(card)] < Math.PI* 0.25){
+            card.scaleX = Math.sin(theta[drawnCards.indexOf(card)]);
+            theta[drawnCards.indexOf(card)] += 0.04;
+        }
+    }
+}
+
+</script>
+
+</body>
+</html>
