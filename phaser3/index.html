@@ -12,26 +12,29 @@
 </head>
 <body>
 
-<script type="text/javascript">
-var config = {
-    type: Phaser.CANVAS,
-    width: 800,
-    height: 576,
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
+<script>
+const canvasWidth = 800
+const canvasHeight = 576
+const deckY = canvasHeight/2
+const cardWith = 90
+const cardHeight = 140
+// const deckStart = 400 - 
 
-var bg;
-var game = new Phaser.Game(config);
+
+let config = {
+    type: Phaser.CANVAS,
+    width: canvasWidth,
+    height: canvasHeight,
+    scene: { preload: preload, create: create, update: update }
+}
 let deck = ['d10','sJ','cA','h5']  // p1, b1, p2, b2
 let theta = [0,0,0,0]
+let bg;
+let game = new Phaser.Game(config);
 let drawnCards = []
 
-function preload ()
-{
+
+function preload (){
     this.load.setPath('assets/');
     this.load.image('bg', 'SOL.jpg');
     for (i of deck){
@@ -40,9 +43,8 @@ function preload ()
     }
 }
 
-function create ()
-{
-    bg = this.add.image(400, document.querySelector('canvas').height/2, 'bg')
+function create (){
+    bg = this.add.image(400, canvasHeight/2, 'bg')
     bg.displayHeight = document.querySelector('canvas').height
     bg.displayWidth = document.querySelector('canvas').width
 
@@ -53,10 +55,9 @@ function create ()
 }
 
 function showCards(obj){
-    var last = deck.pop();
-    var x = Phaser.Math.Between(0, 800);
-    var y = Phaser.Math.Between(0, 576);
-    drawnCards.push(obj.add.image(x, y, last))
+    let last = deck.pop();
+    let x = Phaser.Math.Between(0, 800);
+    drawnCards.push(obj.add.image(x, deckY, last))
 
     if (deck.length > 0){
         setTimeout(function(){
@@ -67,15 +68,18 @@ function showCards(obj){
 
 function update(){
     for(card of drawnCards){
-        card.displayHeight = 140
-        if(theta[drawnCards.indexOf(card)] < Math.PI* 0.25){
+        // console.log(card.displayWidth, theta[drawnCards.indexOf(card)])
+        card.displayHeight = cardHeight
+
+        if(theta[drawnCards.indexOf(card)] <= Math.asin(cardWith/129)){
             card.scaleX = Math.sin(theta[drawnCards.indexOf(card)]);
-            theta[drawnCards.indexOf(card)] += 0.04;
+            theta[drawnCards.indexOf(card)] += 0.025;
+        }else{
+            card.scaleX = cardWith/129
         }
     }
 }
 
 </script>
-
 </body>
 </html>
