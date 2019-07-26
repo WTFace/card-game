@@ -36,11 +36,11 @@ const cardWith = 90
 const cardHeight = 140
 const cardOffset = 18
 const edgeFromCenter = 15
-const scoreX = {'P':358, 'B':590}
+const scoreX = [358, 590]
 const scoreY = 186
 const deck = [
     {'res':'d10', 'X': canvasWidth/2 - edgeFromCenter - cardWith*1.5 - cardOffset}, // p1
-    {'res':'sJ', 'X': canvasWidth/2 + edgeFromCenter + cardWith/2},  // b1
+    {'res':'c8', 'X': canvasWidth/2 + edgeFromCenter + cardWith/2},  // b1
     {'res':'cA', 'X': canvasWidth/2 - edgeFromCenter - cardWith/2},  // p2
     {'res':'h5', 'X': canvasWidth/2 + edgeFromCenter + cardWith*1.5 + cardOffset},  // b2
 ]
@@ -48,6 +48,7 @@ let theta = [0,0,0,0]
 let result = ''
 let resultImageStart = canvasWidth
 let drawnCards = []
+let score = [0, 0]  // p, b
 
 function preload (){
     this.load.setPath('assets/');
@@ -65,10 +66,10 @@ function create (){
     let bg = this.add.image(canvasWidth/2 + 3, canvasHeight/2, 'bg')
     bg.displayWidth = canvasWidth + 3
     bg.displayHeight = canvasHeight
-    let scoreP = this.add.image(scoreX.P, scoreY, '0').setScale(.8)
-    let scoreB = this.add.image(scoreX.B, scoreY, '0').setScale(.8)
+    this.add.image(scoreX[0], scoreY, '0').setScale(.8)
+    this.add.image(scoreX[1], scoreY, '0').setScale(.8)
 
-    showCards(this)
+    showCards(this, 0)
 }
 
 function showCards(obj){
@@ -76,8 +77,24 @@ function showCards(obj){
     const x = first.X;
     drawnCards.push(obj.add.image(x, deckY, first.res).setScale(.725))
 
+    let _score = first.res.slice(1)
+    let key = (deck.length+1)%2
+
+    if ( !isNaN(parseInt(_score))) {
+        _score = parseInt(_score)
+    }else{
+        _score = _score==='A'? 1:0
+    }
+
+    score[key] = (score[key] + _score) % 10
+    console.log(score, _score)
+    setTimeout(function(){
+
+        _score && obj.add.image(scoreX[key], scoreY, `${score[key]}`).setScale(.8)
+    },1000)
     if (deck.length > 0){
         setTimeout(function(){
+            
             showCards(obj)
         }, 1600)
     }
