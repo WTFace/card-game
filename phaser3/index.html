@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>canvas</title>
     <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -23,64 +24,68 @@
 <script>
 const canvasWidth = 794
 const canvasHeight = 576
-const deckY = canvasHeight/2
-const cardWith = 90
-const cardHeight = 140
-const cardOffset = 18
-const edgeFromCenter = 15
-
-
-let config = {
+const config = {
     type: Phaser.CANVAS,
     width: canvasWidth,
     height: canvasHeight,
     scene: { preload: preload, create: create, update: update }
 }
-let deck = [
+const game = new Phaser.Game(config);
+const deckY = canvasHeight/2
+const cardWith = 90
+const cardHeight = 140
+const cardOffset = 18
+const edgeFromCenter = 15
+const scoreX = {'P':358, 'B':590}
+const scoreY = 186
+const deck = [
     {'res':'d10', 'X': canvasWidth/2 - edgeFromCenter - cardWith*1.5 - cardOffset}, // p1
     {'res':'sJ', 'X': canvasWidth/2 + edgeFromCenter + cardWith/2},  // b1
     {'res':'cA', 'X': canvasWidth/2 - edgeFromCenter - cardWith/2},  // p2
     {'res':'h5', 'X': canvasWidth/2 + edgeFromCenter + cardWith*1.5 + cardOffset},  // b2
 ]
 let theta = [0,0,0,0]
-let bg;
-let game = new Phaser.Game(config);
+let result = ''
+let resultImageStart = canvasWidth
 let drawnCards = []
-
 
 function preload (){
     this.load.setPath('assets/');
     this.load.image('bg', 'SOL.jpg');
     for (i of deck){
-        console.log(i)
         this.load.image(i.res , `${i.res}.png`)
+    }
+
+    for (var i = 0; i < 10; i++) {
+        this.load.image(`${i}`, `sum/${i}.png`)
     }
 }
 
 function create (){
-    bg = this.add.image(canvasWidth/2 + 3, canvasHeight/2, 'bg')
+    let bg = this.add.image(canvasWidth/2 + 3, canvasHeight/2, 'bg')
     bg.displayWidth = canvasWidth + 3
     bg.displayHeight = canvasHeight
+    let scoreP = this.add.image(scoreX.P, scoreY, '0').setScale(.8)
+    let scoreB = this.add.image(scoreX.B, scoreY, '0').setScale(.8)
 
     showCards(this)
 }
 
 function showCards(obj){
-    let first = deck.shift();
-    let x = first.X;
+    const first = deck.shift();
+    const x = first.X;
     drawnCards.push(obj.add.image(x, deckY, first.res).setScale(.725))
 
     if (deck.length > 0){
         setTimeout(function(){
             showCards(obj)
-        }, 1000)
+        }, 1600)
     }
 }
 
 function update(){
     for(card of drawnCards){
-        console.log(card.displayWidth, card.displayHeight)
-        // card.displayHeight = cardHeight
+        // console.log(card.displayWidth, card.displayHeight)
 
         if(theta[drawnCards.indexOf(card)] <= Math.asin(cardWith/129)){
             card.scaleX = Math.sin(theta[drawnCards.indexOf(card)]);
@@ -90,6 +95,10 @@ function update(){
         }
     }
 }
+
+$(function(){
+    
+})
 
 </script>
 </body>
