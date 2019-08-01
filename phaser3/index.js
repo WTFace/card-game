@@ -7,9 +7,10 @@ const cardOffset = 18
 const edgeFromCenter = 15
 const scoreX = [358, 590]
 const scoreY = 186
+const resultX = canvasWidth+200
+const resultY = 450
 let deck = []
 let theta = [0,0,0,0,0,0]
-let resultImageStart = canvasWidth
 let score = [0, 0]  // p, b
 let drawnCards = []
 let result = ''
@@ -21,6 +22,9 @@ class GameScene extends Phaser.Scene{
     preload (){
         this.load.setPath('assets/');
         this.load.image('bg', 'SOL.jpg');
+        this.load.image('player', 'player.png');
+        this.load.image('banker', 'banker.png');
+        this.load.image('tie', 'tie.png');
         for (i of deck){
             if(i.res) this.load.image(i.res , `${i.res}.png`)
         }
@@ -34,14 +38,19 @@ class GameScene extends Phaser.Scene{
         bg.displayHeight = canvasHeight
         this.add.image(scoreX[0], scoreY, '0').setScale(.8)
         this.add.image(scoreX[1], scoreY, '0').setScale(.8)
-
-        this.showCards(this, 0)
+        
+        this.showCards(this)
     }
 
     showCards(obj){
+        // console.log(deck)
+        if (deck.length ===0) {
+            this.showResult()
+            return;
+        }
         const first = deck.shift();
         
-        if (deck.length > 1) {
+        if (deck.length >= 2) {
             drawnCards.push(obj.add.image(first.X, deckY, first.res).setScale(.725))
         }else{
             if(first.res) drawnCards.push(obj.add.image(first.X, deckY-(cardHeight-cardWith)/2, first.res).setScale(.725).setAngle(90))
@@ -62,27 +71,41 @@ class GameScene extends Phaser.Scene{
             _score>0 && obj.add.image(scoreX[key], scoreY, `${score[key]}`).setScale(.8)
         },1000)
         if (deck.length > 2){
+
             setTimeout(function(){
                 obj.showCards(obj)
             }, 1600)
         }
-        else if(deck.length > 0){
+        else{
+        // else if(deck.length > 0){
             if (first.res) {
                 setTimeout(_=>{obj.showCards(obj)}, 3000)
             }else{
                 obj.showCards(obj)
             }
         }
-        if (deck.length ===0) {
-            this.showResult()
-        }
     }
 
     showResult(){
-        console.log('end')
-        setTimeout(_=>{this.scene.start('timer')}, 3000)
+        setTimeout(_=>{
+            this.resultImg = this.add.image(resultX, resultY, 'player').setScale(.75)
+            this.resultSpeed = 1.2
+            this.finished = true
+            this.timedEvent = this.time.addEvent({ delay: 1000});
+            setTimeout(_=>{
+                this.scene.start('timer')
+            },3000)
+        },1000)
     }
-    update(){
+
+    update(time, delta){
+        if (this.finished && this.resultImg.x - (this.resultSpeed * delta) >= canvasWidth/2) {
+            this.resultImg.x -= this.resultSpeed * delta
+            this.resultSpeed -= 0.07*this.timedEvent.getProgress()
+            // console.log(delta, time)
+            // console.log(this.resultSpeed, this.timedEvent.getProgress())
+        }
+
         for(let card of drawnCards){
             // console.log(card.displayWidth, card.displayHeight)
             if(theta[drawnCards.indexOf(card)] <= Math.asin(cardWith/129)){
@@ -116,12 +139,13 @@ class Timer extends Phaser.Scene{
             {'res':'cA', 'X': canvasWidth/2 - edgeFromCenter - cardWith/2},
             {'res':'h5', 'X': canvasWidth/2 + edgeFromCenter + cardWith*1.5 + cardOffset},
             {'res':'c8', 'X': canvasWidth/2 - edgeFromCenter - cardWith*2 - cardOffset*2 - cardHeight*0.5},
-            {'res':'sJ', 'X': canvasWidth/2 + edgeFromCenter + cardWith*2 + cardOffset*2 + cardHeight*0.5},
+            {'res':'c8', 'X': canvasWidth/2 + edgeFromCenter + cardWith*2 + cardOffset*2 + cardHeight*0.5},
         ];
-        drawnCards = []
+        theta = [0,0,0,0,0,0]
+        score = [0, 0]; drawnCards = []
         setTimeout(_=>{
             this.scene.start('game');
-        }, 4000)
+        }, 2000)
     }
 }
 
