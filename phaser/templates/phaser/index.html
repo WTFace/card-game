@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>canvas</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <script>
+        const assets = "{% static 'phaser/assets/' %}"
+    </script>
+    <script src="{% static 'phaser/index.js' %}"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+        .ruler{
+            top: 199px;
+            position: absolute;
+            background: goldenrod;
+            width: 397px;
+        }
+    </style>
+</head>
+<body>
+
+<script>
+
+</script>
+</body>
+</html>
