@@ -1,19 +1,22 @@
-const canvasWidth = 794
-const canvasHeight = 572
-const deckY = canvasHeight/2+2
-const cardWith = 90
-const cardHeight = 140
-const cardOffset = 18
-const edgeFromCenter = 15
-const scoreX = [358, 590]
-const scoreY = 186
-const resultX = canvasWidth+200
-const resultY = 450
-let deck = []
-let theta = [0,0,0,0,0,0]
-let score = [0, 0]  // p, b
-let drawnCards = []
-let result = ''
+const canvasWidth = 794;
+const canvasHeight = 572;
+const deckY = canvasHeight/2+2;
+const cardWith = 90;
+const cardHeight = 140;
+const cardOffset = 18;
+const edgeFromCenter = 15;
+const scoreX = [358, 590];
+const scoreY = 186;
+const resultX = canvasWidth+200;
+const resultY = 450;
+const tboxY = 86;
+const tboxOffset = 9;
+const tboxLeft = canvasWidth/2-63;
+let deck = [];
+let theta = [0,0,0,0,0,0];
+let score = [0, 0];  // p, b
+let drawnCards = [];
+let result = '';
 
 class GameScene extends Phaser.Scene{
     constructor(){
@@ -33,11 +36,11 @@ class GameScene extends Phaser.Scene{
         }
     }
     create (){
-        let bg = this.add.image(canvasWidth/2 + 3, canvasHeight/2, 'bg')
-        bg.displayWidth = canvasWidth + 3
-        bg.displayHeight = canvasHeight
-        this.add.image(scoreX[0], scoreY, '0').setScale(.8)
-        this.add.image(scoreX[1], scoreY, '0').setScale(.8)
+        let bg = this.add.image(canvasWidth/2 + 3, canvasHeight/2, 'bg');
+        bg.displayWidth = canvasWidth + 3;
+        bg.displayHeight = canvasHeight;
+        this.add.image(scoreX[0], scoreY, '0').setScale(.8);
+        this.add.image(scoreX[1], scoreY, '0').setScale(.8);
         
         this.showCards(this)
     }
@@ -45,7 +48,7 @@ class GameScene extends Phaser.Scene{
     showCards(obj){
         // console.log(deck)
         if (deck.length ===0) {
-            this.showResult()
+            this.showResult();
             return;
         }
         const first = deck.shift();
@@ -56,8 +59,8 @@ class GameScene extends Phaser.Scene{
             if(first.res) drawnCards.push(obj.add.image(first.X, deckY-(cardHeight-cardWith)/2, first.res).setScale(.725).setAngle(90))
         }
 
-        let _score = first.res.slice(1)
-        let key = (deck.length+1)%2
+        let _score = first.res.slice(1);
+        let key = (deck.length+1)%2;
 
         if ( !isNaN(parseInt(_score))) {
             _score = parseInt(_score)
@@ -65,16 +68,16 @@ class GameScene extends Phaser.Scene{
             _score = _score==='A'? 1:0
         }
 
-        score[key] = (score[key] + _score) % 10
+        score[key] = (score[key] + _score) % 10;
         // console.log(score, _score)
         setTimeout(function(){
             _score>0 && obj.add.image(scoreX[key], scoreY, `${score[key]}`).setScale(.8)
-        },1000)
+        },1200);
         if (deck.length > 2){
 
             setTimeout(function(){
                 obj.showCards(obj)
-            }, 1600)
+            }, 1800)
         }
         else{
         // else if(deck.length > 0){
@@ -88,19 +91,19 @@ class GameScene extends Phaser.Scene{
 
     showResult(){
         setTimeout(_=>{
-            this.resultImg = this.add.image(resultX, resultY, 'player').setScale(.75)
-            this.resultSpeed = 1.2
-            this.finished = true
+            this.resultImg = this.add.image(resultX, resultY, 'player').setScale(.75);
+            this.resultSpeed = 1.2;
+            this.finished = true;
             this.timedEvent = this.time.addEvent({ delay: 1000});
             setTimeout(_=>{
                 this.scene.start('timer')
-            },3000)
+            },4000)
         },1000)
     }
 
     update(time, delta){
         if (this.finished && this.resultImg.x - (this.resultSpeed * delta) >= canvasWidth/2) {
-            this.resultImg.x -= this.resultSpeed * delta
+            this.resultImg.x -= this.resultSpeed * delta;
             this.resultSpeed -= 0.07*this.timedEvent.getProgress()
             // console.log(delta, time)
             // console.log(this.resultSpeed, this.timedEvent.getProgress())
@@ -126,13 +129,26 @@ class Timer extends Phaser.Scene{
     preload(){
         this.load.setPath(assets);
         this.load.image('map', 'map.png');
+        this.load.image('tbox', 'time/tbox.png');
+        this.load.image('pin0', 'time/pin0.png');
+        this.load.image('pin1', 'time/pin1.png');
+        this.load.image('grey', 'time/0_1.png');
+        for (var i = 0; i < 10; i++) {
+            this.load.image(`t_${i}`, `time/${i}.png`)
+        }
     }
 
     create(){
-        let bg = this.add.image(canvasWidth/2, canvasHeight - 215, 'map')
-        // console.log(bg.displayHeight, bg.displayWidth)
-        bg.displayWidth = 780
-        bg.displayHeight = 423.5
+        let bg = this.add.image(canvasWidth/2, canvasHeight - 215, 'map');
+        bg.displayWidth = 780;
+        bg.displayHeight = 423.5;
+        let tbox = this.add.image(canvasWidth/2, tboxY, 'tbox').setScale(.7)
+        tbox.displayWidth = 178
+        let grey = this.add.image(tboxLeft, tboxY, 'grey').setScale(.7)
+        this.add.image(tboxLeft + (tboxOffset+grey.displayWidth), tboxY, 't_0').setScale(.7)
+        let colon = this.add.image(tboxLeft + (tboxOffset+grey.displayWidth) + tboxOffset*3, tboxY, 'pin0').setScale(.7)
+        let timer1 = this.add.image(tboxLeft + (tboxOffset+grey.displayWidth)*2 + tboxOffset*2, tboxY, 'grey').setScale(.7)
+        let timer2 = this.add.image(tboxLeft + (tboxOffset+grey.displayWidth)*3 + tboxOffset*2, tboxY, 'grey').setScale(.7)
         deck = [
             {'res':'d10', 'X': canvasWidth/2 - edgeFromCenter - cardWith*1.5 - cardOffset},
             {'res':'c8', 'X': canvasWidth/2 + edgeFromCenter + cardWith/2},
@@ -141,11 +157,24 @@ class Timer extends Phaser.Scene{
             {'res':'c8', 'X': canvasWidth/2 - edgeFromCenter - cardWith*2 - cardOffset*2 - cardHeight*0.5},
             {'res':'c8', 'X': canvasWidth/2 + edgeFromCenter + cardWith*2 + cardOffset*2 + cardHeight*0.5},
         ];
-        theta = [0,0,0,0,0,0]
-        score = [0, 0]; drawnCards = []
-        setTimeout(_=>{
-            this.scene.start('game');
-        }, 2000)
+        theta = [0,0,0,0,0,0];
+        score = [0, 0]; drawnCards = [];
+        let interval = setInterval(_=>{
+            let d = new Date();
+            let sec = 59 - d.getSeconds()
+            let digit1 = parseInt(sec/10)
+            let digit2 = sec%10
+            console.log(sec, 2)
+
+            timer1.setTexture(`t_${digit1}`)
+            timer2.setTexture(`t_${digit2}`)
+            colon.setTexture('pin0')
+            setTimeout(_=>{colon.setTexture('pin1')},500)
+            if(d.getSeconds()===0){
+                clearInterval(interval)
+                this.scene.start('game');
+            }
+        }, 1000)
     }
 }
 
@@ -155,5 +184,5 @@ const config = {
     height: canvasHeight,
     scene: [Timer, GameScene]
     // scene: { preload: preload, create: create, update: update }
-}
+};
 const game = new Phaser.Game(config);

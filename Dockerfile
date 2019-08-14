@@ -28,4 +28,4 @@ WORKDIR /home/bac
 EXPOSE 80
 CMD ["supervisord", "-n"]
 
-# docker run -p8000:80 -dt -v /Users/root1/GoogleD/phaser:/home/bac --name bac bac 
+# docker run -p8080:80 -dt -v /Users/root1/GoogleD/phaser:/home/bac --name bac bac
