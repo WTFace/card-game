@@ -16,9 +16,19 @@ let deck = [];
 let result;
 let bigTableX = 26;
 let bigTableY = 292;
-let bigTbOffsetX = 38;
-let bigTbOffsetY = 39;
-
+let bigTbOffsetX = 39;
+let bigTbOffsetY = 38;
+let allResults = [
+    {res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:'p'},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},
+    {res:'banker', pair:'b'},
+    {res:'player', pair:''},
+    {res:'banker', pair:'p'},
+    {res:'player', pair:''},
+    {res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},
+    {res:'player', pair:''},
+    {res:'tie', pair:'bp'},
+    {res:'player', pair:''},{res:'player', pair:'b'}
+]
 
 class GameScene extends Phaser.Scene{
     constructor(){
@@ -75,7 +85,7 @@ class GameScene extends Phaser.Scene{
 
         this.score[key] = (this.score[key] + _score) % 10;
         console.log(this.score)
-        setTimeout(function(){
+        setTimeout(()=>{
             _score>0 && obj.add.image(scoreX[key], scoreY, `${obj.score[key]}`).setScale(.8)
         },1200);
         if (deck.length > 2){
@@ -139,6 +149,8 @@ class Timer extends Phaser.Scene{
         this.load.image('b2', 'table/b2.png');
         this.load.image('p2', 'table/p2.png');
         this.load.image('t2', 'table/t2.png');
+        this.load.image('bp', 'table/bp2.png');
+        this.load.image('pp', 'table/pp2.png');
         for (var i = 0; i < 10; i++) {
             this.load.image(`t_${i}`, `time/${i}.png`)
         }
@@ -165,27 +177,25 @@ class Timer extends Phaser.Scene{
         ];
         result = 'player'
 
-        let bigTb = this.add.image(bigTableX, bigTableY, 'b2').setScale(.72)
-        this.add.image(bigTableX, bigTableY+bigTbOffsetX*1, 'b2').setScale(.72)
-        this.add.image(bigTableX, bigTableY+bigTbOffsetX*2, 'b2').setScale(.72)
-        this.add.image(bigTableX, bigTableY+bigTbOffsetX*3, 'b2').setScale(.72)
-        this.add.image(bigTableX, bigTableY+bigTbOffsetX*4, 'b2').setScale(.72)
-        this.add.image(bigTableX, bigTableY+bigTbOffsetX*5, 'b2').setScale(.72)
 
+        for(const i in allResults){ // index
+            this.add.image(bigTableX + bigTbOffsetX*parseInt(i/6), bigTableY + bigTbOffsetY*(i%6), `${allResults[i].res[0]}2`).setScale(.72)
+            if (allResults[i].pair.includes('b')) this.add.image(bigTableX + bigTbOffsetX*parseInt(i/6), bigTableY + bigTbOffsetY*(i%6), 'bp').setScale(.72)
+            if (allResults[i].pair.includes('p')) this.add.image(bigTableX + bigTbOffsetX*parseInt(i/6), bigTableY + bigTbOffsetY*(i%6), 'pp').setScale(.72)
+        }
         
         let interval = setInterval(_=>{
             let d = new Date();
             let sec = 59 - d.getSeconds()
             let digit1 = parseInt(sec/10)
             let digit2 = sec%10
-            console.log(sec, 2)
 
             timer1.setTexture(`t_${digit1}`)
             timer2.setTexture(`t_${digit2}`)
             colon.setTexture('pin0')
             if(d.getSeconds()===0){
-                clearInterval(interval)
-                this.scene.start('game');
+                // clearInterval(interval)
+                // this.scene.start('game');
             }else{
                 setTimeout(_=>{colon.setTexture('pin1')},500)
             }
