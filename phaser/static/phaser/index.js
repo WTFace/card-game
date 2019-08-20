@@ -141,7 +141,7 @@ class Timer extends Phaser.Scene{
 
     preload(){
         this.load.setPath(assets);
-        this.load.image('map', 'map.png');
+        this.load.image('map', 'table/map.png');
         this.load.image('tbox', 'time/tbox.png');
         this.load.image('pin0', 'time/pin0.png');
         this.load.image('pin1', 'time/pin1.png');
