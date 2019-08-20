@@ -1,23 +1,13 @@
 const canvasWidth = 794;
 const canvasHeight = 572;
-const deckY = canvasHeight/2+2;
 const cardWith = 90;
 const cardHeight = 140;
 const cardOffset = 18;
 const edgeFromCenter = 15;
-const scoreX = [358, 590];
-const scoreY = 186;
-const resultX = canvasWidth+200;
-const resultY = 450;
-const tboxY = 86;
-const tboxOffset = 9;
-const tboxLeft = canvasWidth/2-63;
+
+
 let deck = [];
 let result;
-let bigTableX = 26;
-let bigTableY = 292;
-let bigTbOffsetX = 39;
-let bigTbOffsetY = 38;
 let allResults = [
     {res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:'p'},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},
     {res:'banker', pair:'b'},
@@ -35,6 +25,8 @@ class GameScene extends Phaser.Scene{
         super('game')
         this.theta = [0,0,0,0,0,0];
         this.score = [0, 0];
+        this.scoreX = [358, 590];
+        this.scoreY = 186;
         this.drawnCards = [];
     }
     preload (){
@@ -54,13 +46,14 @@ class GameScene extends Phaser.Scene{
         let bg = this.add.image(canvasWidth/2 + 3, canvasHeight/2, 'bg');
         bg.displayWidth = canvasWidth + 3;
         bg.displayHeight = canvasHeight;
-        this.add.image(scoreX[0], scoreY, '0').setScale(.8);
-        this.add.image(scoreX[1], scoreY, '0').setScale(.8);
+        this.add.image(this.scoreX[0], this.scoreY, '0').setScale(.8);
+        this.add.image(this.scoreX[1], this.scoreY, '0').setScale(.8);
         
         this.showCards(this)
     }
 
     showCards(obj){
+        const deckY = canvasHeight/2+2;
         // console.log(deck)
         if (deck.length ===0) {
             this.showResult();
@@ -86,7 +79,7 @@ class GameScene extends Phaser.Scene{
         this.score[key] = (this.score[key] + _score) % 10;
         console.log(this.score)
         setTimeout(()=>{
-            _score>0 && obj.add.image(scoreX[key], scoreY, `${obj.score[key]}`).setScale(.8)
+            _score>0 && obj.add.image(obj.scoreX[key], obj.scoreY, `${obj.score[key]}`).setScale(.8)
         },1200);
         if (deck.length > 2){
             setTimeout(function(){
@@ -104,7 +97,7 @@ class GameScene extends Phaser.Scene{
 
     showResult(){
         setTimeout(_=>{
-            this.resultImg = this.add.image(resultX, resultY, result).setScale(.75);
+            this.resultImg = this.add.image(canvasWidth+200, 450, result).setScale(.75);
             this.resultSpeed = 1.2;
             this.finished = true;
             this.timedEvent = this.time.addEvent({ delay: 1000});
@@ -137,6 +130,13 @@ class GameScene extends Phaser.Scene{
 class Timer extends Phaser.Scene{
     constructor(){
         super('timer')
+        this.tboxY = 86;
+        this.tboxOffset = 9;
+        this.tboxLeft = canvasWidth/2-63;
+        this.bigTableX = 26;
+        this.bigTableY = 292;
+        this.bigTbOffsetX = 39;
+        this.bigTbOffsetY = 38;
     }
 
     preload(){
@@ -160,13 +160,13 @@ class Timer extends Phaser.Scene{
         let bg = this.add.image(canvasWidth/2, canvasHeight - 215, 'map');
         bg.displayWidth = 780; bg.displayHeight = 423.5;
 
-        let tbox = this.add.image(canvasWidth/2, tboxY, 'tbox').setScale(.7)
+        let tbox = this.add.image(canvasWidth/2, this.tboxY, 'tbox').setScale(.7)
         tbox.displayWidth = 178
-        let grey = this.add.image(tboxLeft, tboxY, 'grey').setScale(.7)
-        this.add.image(tboxLeft + (tboxOffset+grey.displayWidth), tboxY, 't_0').setScale(.7)
-        let colon = this.add.image(tboxLeft + (tboxOffset+grey.displayWidth) + tboxOffset*3, tboxY, 'pin0').setScale(.7)
-        let timer1 = this.add.image(tboxLeft + (tboxOffset+grey.displayWidth)*2 + tboxOffset*2, tboxY, 'grey').setScale(.7)
-        let timer2 = this.add.image(tboxLeft + (tboxOffset+grey.displayWidth)*3 + tboxOffset*2, tboxY, 'grey').setScale(.7)
+        let grey = this.add.image(this.tboxLeft, this.tboxY, 'grey').setScale(.7)
+        this.add.image(this.tboxLeft + (this.tboxOffset+grey.displayWidth), this.tboxY, 't_0').setScale(.7)
+        let colon = this.add.image(this.tboxLeft + (this.tboxOffset+grey.displayWidth) + this.tboxOffset*3, this.tboxY, 'pin0').setScale(.7)
+        let timer1 = this.add.image(this.tboxLeft + (this.tboxOffset+grey.displayWidth)*2 + this.tboxOffset*2, this.tboxY, 'grey').setScale(.7)
+        let timer2 = this.add.image(this.tboxLeft + (this.tboxOffset+grey.displayWidth)*3 + this.tboxOffset*2, this.tboxY, 'grey').setScale(.7)
         deck = [
             {'res':'d10', 'X': canvasWidth/2 - edgeFromCenter - cardWith*1.5 - cardOffset},
             {'res':'c8', 'X': canvasWidth/2 + edgeFromCenter + cardWith/2},
@@ -179,9 +179,9 @@ class Timer extends Phaser.Scene{
 
 
         for(const i in allResults){ // index
-            this.add.image(bigTableX + bigTbOffsetX*parseInt(i/6), bigTableY + bigTbOffsetY*(i%6), `${allResults[i].res[0]}2`).setScale(.72)
-            if (allResults[i].pair.includes('b')) this.add.image(bigTableX + bigTbOffsetX*parseInt(i/6), bigTableY + bigTbOffsetY*(i%6), 'bp').setScale(.72)
-            if (allResults[i].pair.includes('p')) this.add.image(bigTableX + bigTbOffsetX*parseInt(i/6), bigTableY + bigTbOffsetY*(i%6), 'pp').setScale(.72)
+            this.add.image(this.bigTableX + this.bigTbOffsetX*parseInt(i/6), this.bigTableY + this.bigTbOffsetY*(i%6), `${allResults[i].res[0]}2`).setScale(.72)
+            if (allResults[i].pair.includes('b')) this.add.image(this.bigTableX + this.bigTbOffsetX*parseInt(i/6), this.bigTableY + this.bigTbOffsetY*(i%6), 'bp').setScale(.72)
+            if (allResults[i].pair.includes('p')) this.add.image(this.bigTableX + this.bigTbOffsetX*parseInt(i/6), this.bigTableY + this.bigTbOffsetY*(i%6), 'pp').setScale(.72)
         }
         
         let interval = setInterval(_=>{
@@ -193,9 +193,9 @@ class Timer extends Phaser.Scene{
             timer1.setTexture(`t_${digit1}`)
             timer2.setTexture(`t_${digit2}`)
             colon.setTexture('pin0')
-            if(d.getSeconds()===0){
-                // clearInterval(interval)
-                // this.scene.start('game');
+            if(d.getSeconds()%10 ===0){
+                clearInterval(interval)
+                this.scene.start('game');
             }else{
                 setTimeout(_=>{colon.setTexture('pin1')},500)
             }
