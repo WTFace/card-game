@@ -1,3 +1,4 @@
+'use strict';
 const canvasWidth = 794;
 const canvasHeight = 572;
 const cardWith = 90;
@@ -9,15 +10,21 @@ const edgeFromCenter = 15;
 let deck = [];
 let result;
 let allResults = [
-    {res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:'p'},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},
-    {res:'banker', pair:'b'},
-    {res:'player', pair:''},
-    {res:'banker', pair:'p'},
-    {res:'player', pair:''},
+    {res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:'b'},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},
     {res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},
+    {res:'banker', pair:'p'},{res:'banker', pair:''},{res:'banker', pair:''},
+    {res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:'p'},{res:'player', pair:''},
     {res:'player', pair:''},
-    {res:'tie', pair:'bp'},
-    {res:'player', pair:''},{res:'player', pair:'b'}
+    {res:'banker', pair:'p'},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},
+    {res:'player', pair:''},{res:'player', pair:''},
+    {res:'tie', pair:''},{res:'tie', pair:'bp'},
+    {res:'banker', pair:'p'},
+    {res:'player', pair:''},{res:'player', pair:''},
+    {res:'banker', pair:''},{res:'banker', pair:''},
+    {res:'player', pair:''},{res:'player', pair:''},
+    {res:'banker', pair:''},{res:'banker', pair:''},
+    {res:'player', pair:''},{res:'player', pair:'b'},
+    {res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:'p'},{res:'banker', pair:''},{res:'tie', pair:''},{res:'banker', pair:''}, 
 ]
 
 class GameScene extends Phaser.Scene{
@@ -137,6 +144,16 @@ class Timer extends Phaser.Scene{
         this.bigTableY = 292;
         this.bigTbOffsetX = 39;
         this.bigTbOffsetY = 38;
+        this.smallTbX = 18;
+        this.smallTbY = 155;
+        this.smallTbOffX = 20.52;
+        this.smallTbOffY = 20;
+        this.prevResult = '';
+        this.streak = 0;
+        this.sideStreak = 0;
+        this.streakBroke = 0;
+        this.tieStreak = 0;
+        this.coord = new Set();
     }
 
     preload(){
@@ -149,8 +166,17 @@ class Timer extends Phaser.Scene{
         this.load.image('b2', 'table/b2.png');
         this.load.image('p2', 'table/p2.png');
         this.load.image('t2', 'table/t2.png');
-        this.load.image('bp', 'table/bp2.png');
-        this.load.image('pp', 'table/pp2.png');
+        this.load.image('bp2', 'table/bp2.png');
+        this.load.image('pp2', 'table/pp2.png');
+        this.load.image('bp', 'table/bp.png');
+        this.load.image('pp', 'table/pp.png');
+        this.load.image('p', 'table/p.png');
+        this.load.image('b', 'table/b.png');
+        this.load.image('1', 'table/tie.png');
+        this.load.image('2', 'table/2tie.png');
+        this.load.image('3', 'table/3tie.png');
+        this.load.image('4', 'table/4tie.png');
+        this.load.image('5', 'table/5tie.png');
         for (var i = 0; i < 10; i++) {
             this.load.image(`t_${i}`, `time/${i}.png`)
         }
@@ -176,12 +202,42 @@ class Timer extends Phaser.Scene{
             {'res':'c8', 'X': canvasWidth/2 + edgeFromCenter + cardWith*2 + cardOffset*2 + cardHeight*0.5},
         ];
         result = 'player'
-
+        
 
         for(const i in allResults){ // index
-            this.add.image(this.bigTableX + this.bigTbOffsetX*parseInt(i/6), this.bigTableY + this.bigTbOffsetY*(i%6), `${allResults[i].res[0]}2`).setScale(.72)
-            if (allResults[i].pair.includes('b')) this.add.image(this.bigTableX + this.bigTbOffsetX*parseInt(i/6), this.bigTableY + this.bigTbOffsetY*(i%6), 'bp').setScale(.72)
-            if (allResults[i].pair.includes('p')) this.add.image(this.bigTableX + this.bigTbOffsetX*parseInt(i/6), this.bigTableY + this.bigTbOffsetY*(i%6), 'pp').setScale(.72)
+            const current = allResults[i]
+            this.add.image(this.bigTableX + this.bigTbOffsetX*parseInt(i/6), this.bigTableY + this.bigTbOffsetY*(i%6), `${current.res[0]}2`).setScale(.72)
+
+            if (this.prevResult === current.res) {
+                if(this.coord.has(`${this.streakBroke+this.sideStreak}_${this.streak+1}`) || this.streak===5){
+                    this.sideStreak++;
+                    this.coord.add(`${this.streakBroke+this.sideStreak}_${this.streak}`)
+                }else{
+                    this.streak < 5 && !this.coord.has(`${this.streakBroke+this.sideStreak}_${this.streak+1}`) && this.streak++;
+                }
+            }
+            
+            if(this.prevResult !== current.res && current.res !== 'tie') {
+                this.streak = 0; this.sideStreak = 0;
+                this.prevResult = current.res;
+                this.tieStreak = 0
+                i >0 && this.streakBroke++
+            }
+            if (current.res ==='tie') {
+                this.tieStreak++
+                current.res = `${this.tieStreak}`
+            }
+            this.add.image(this.smallTbX + this.smallTbOffX*(this.streakBroke + this.sideStreak), this.smallTbY + this.smallTbOffY*this.streak, current.res[0]).setScale(.7)
+            console.log( this.sideStreak, this.streakBroke,this.streak, this.coord)
+
+            if (current.pair.includes('b')) { 
+                this.add.image(this.bigTableX + this.bigTbOffsetX*parseInt(i/6), this.bigTableY + this.bigTbOffsetY*(i%6), 'bp2').setScale(.72)
+                this.add.image(this.smallTbX + this.smallTbOffX*(this.streakBroke + this.sideStreak), this.smallTbY + this.smallTbOffY*this.streak, 'bp').setScale(.7)
+            }
+            if (current.pair.includes('p')) {
+                this.add.image(this.bigTableX + this.bigTbOffsetX*parseInt(i/6), this.bigTableY + this.bigTbOffsetY*(i%6), 'pp2').setScale(.72)
+                this.add.image(this.smallTbX + this.smallTbOffX*(this.streakBroke + this.sideStreak), this.smallTbY + this.smallTbOffY*this.streak, 'pp').setScale(.7)
+            }
         }
         
         let interval = setInterval(_=>{
@@ -193,9 +249,9 @@ class Timer extends Phaser.Scene{
             timer1.setTexture(`t_${digit1}`)
             timer2.setTexture(`t_${digit2}`)
             colon.setTexture('pin0')
-            if(d.getSeconds()%10 ===0){
-                clearInterval(interval)
-                this.scene.start('game');
+            if(d.getSeconds()===0){
+                // clearInterval(interval)
+                // this.scene.start('game');
             }else{
                 setTimeout(_=>{colon.setTexture('pin1')},500)
             }
