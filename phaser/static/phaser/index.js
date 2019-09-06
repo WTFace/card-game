@@ -10,21 +10,16 @@ const edgeFromCenter = 15;
 let deck = [];
 let result;
 let allResults = [
-    {res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:'b'},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},
-    {res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},
-    {res:'banker', pair:'p'},{res:'banker', pair:''},{res:'banker', pair:''},
-    {res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:'p'},{res:'player', pair:''},
+    {res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:'p'},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},{res:'player', pair:''},
+    {res:'banker', pair:'b'}, {res:'banker', pair:''},
     {res:'player', pair:''},
-    {res:'banker', pair:'p'},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},
-    {res:'player', pair:''},{res:'player', pair:''},
-    {res:'tie', pair:''},{res:'tie', pair:'bp'},
     {res:'banker', pair:'p'},
-    {res:'player', pair:''},{res:'player', pair:''},
-    {res:'banker', pair:''},{res:'banker', pair:''},
-    {res:'player', pair:''},{res:'player', pair:''},
-    {res:'banker', pair:''},{res:'banker', pair:''},
+    {res:'player', pair:''},
+    {res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},
+    {res:'player', pair:''},
+    {res:'tie', pair:'bp'},
     {res:'player', pair:''},{res:'player', pair:'b'},
-    {res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:''},{res:'banker', pair:'p'},{res:'banker', pair:''},{res:'tie', pair:''},{res:'banker', pair:''}, 
+    {res:'tie', pair:''},
 ]
 
 class GameScene extends Phaser.Scene{
@@ -43,7 +38,7 @@ class GameScene extends Phaser.Scene{
         this.load.image('banker', 'banker.png');
         this.load.image('tie', 'tie.png');
         for (i of deck){
-            if(i.res) this.load.image(i.res , `${i.res}.png`)
+            if(i.res) this.load.image(i.res , `cards/${i.res}.png`)
         }
         for (var i = 0; i < 10; i++) {
             this.load.image(`${i}`, `sum/${i}.png`)
@@ -109,6 +104,9 @@ class GameScene extends Phaser.Scene{
             this.finished = true;
             this.timedEvent = this.time.addEvent({ delay: 1000});
             setTimeout(_=>{
+                this.theta = [0,0,0,0,0,0];
+                this.score = [0, 0];
+                this.drawnCards = [];
                 this.scene.start('timer')
             },4000)
         },1000)
@@ -172,11 +170,11 @@ class Timer extends Phaser.Scene{
         this.load.image('pp', 'table/pp.png');
         this.load.image('p', 'table/p.png');
         this.load.image('b', 'table/b.png');
-        this.load.image('1', 'table/tie.png');
-        this.load.image('2', 'table/2tie.png');
-        this.load.image('3', 'table/3tie.png');
-        this.load.image('4', 'table/4tie.png');
-        this.load.image('5', 'table/5tie.png');
+        this.load.image('t-1', 'table/tie.png');
+        this.load.image('t-2', 'table/2tie.png');
+        this.load.image('t-3', 'table/3tie.png');
+        this.load.image('t-4', 'table/4tie.png');
+        this.load.image('t-5', 'table/5tie.png');
         for (var i = 0; i < 10; i++) {
             this.load.image(`t_${i}`, `time/${i}.png`)
         }
@@ -217,18 +215,20 @@ class Timer extends Phaser.Scene{
                 }
             }
             
-            if(this.prevResult !== current.res && current.res !== 'tie') {
+            if(this.prevResult !== current.res && current.res[0] !== 't') {
                 this.streak = 0; this.sideStreak = 0;
                 this.prevResult = current.res;
                 this.tieStreak = 0
                 i >0 && this.streakBroke++
             }
-            if (current.res ==='tie') {
+            if (current.res[0] ==='t') {
                 this.tieStreak++
-                current.res = `${this.tieStreak}`
+                current.res = `t-${this.tieStreak}`
+            }else{
+                current.res = current.res[0]
             }
-            this.add.image(this.smallTbX + this.smallTbOffX*(this.streakBroke + this.sideStreak), this.smallTbY + this.smallTbOffY*this.streak, current.res[0]).setScale(.7)
-            console.log( this.sideStreak, this.streakBroke,this.streak, this.coord)
+            this.add.image(this.smallTbX + this.smallTbOffX*(this.streakBroke + this.sideStreak), this.smallTbY + this.smallTbOffY*this.streak, current.res).setScale(.7)
+            // console.log( this.sideStreak, this.streakBroke,this.streak, this.coord)
 
             if (current.pair.includes('b')) { 
                 this.add.image(this.bigTableX + this.bigTbOffsetX*parseInt(i/6), this.bigTableY + this.bigTbOffsetY*(i%6), 'bp2').setScale(.72)
@@ -249,9 +249,15 @@ class Timer extends Phaser.Scene{
             timer1.setTexture(`t_${digit1}`)
             timer2.setTexture(`t_${digit2}`)
             colon.setTexture('pin0')
-            if(d.getSeconds()===0){
-                // clearInterval(interval)
-                // this.scene.start('game');
+            if(d.getSeconds()%10===0){
+                clearInterval(interval);
+                this.prevResult = '';
+                this.streak = 0;
+                this.sideStreak = 0;
+                this.streakBroke = 0;
+                this.tieStreak = 0;
+                this.coord.clear();
+                this.scene.start('game');
             }else{
                 setTimeout(_=>{colon.setTexture('pin1')},500)
             }
