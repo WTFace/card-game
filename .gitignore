@@ -1,6 +1,7 @@
 venv/
 db.sqlite3
 .idea/
-
+sftp-config.json
 __pycache__
 .DS_Store
+node_modules/
